@@ -235,7 +235,18 @@ extension AKPFlowLayout {
             // Trying to use layoutAttributesForItemAtIndexPath for empty section would
             // cause EXC_ARITHMETIC in simulator (division by zero items)
             let lastInSectionIdx = collectionView.numberOfItems(inSection: section) - 1
-            if lastInSectionIdx < 0 { return (0, 0) }
+            if lastInSectionIdx < 0 {
+                
+                // calculate bounaries for empty non-first sections with headers
+                
+                guard section > 0 else { return (0, 0) }    // return 0's for first section (assuming it's used for a global header, and never has items)
+                
+                guard
+                    let headerAttributes = super.layoutAttributesForSupplementaryView( ofKind: UICollectionElementKindSectionHeader, at: IndexPath(item: 0, section: section)) as? AKPFlowLayoutAttributes
+                    else {return (0, 0)}    // return 0's when no header
+                
+                return (headerAttributes.frame.minY, headerAttributes.frame.maxY)   // return boundaries  
+            }
                                                                                             
             guard let attributesForFirstItemInSection = layoutAttributesForItem(
                                             at: IndexPath(item: 0, section: section)),
